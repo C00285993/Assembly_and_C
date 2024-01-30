@@ -1,17 +1,18 @@
 *-----------------------------------------------------------
-* Title      : practical_03_part1.X68
+* Title      : practical_03_part3.X68
 * Written by : Elvis Omorusi
 * Date       : 30/01/2024
 * Description:
 *-----------------------------------------------------------
     ORG    $1000
-START:
+START:  
 
-    LEA $4000, A1
-    MOVE.B #100,(A1)
-                  
+    LEA HEALTH, A3
+    SUB.B   #10, (A3)                
+
     SIMHALT             
 
+HEALTH dc.b     $64
     END    START        
 
 *~Font name~Courier New~
