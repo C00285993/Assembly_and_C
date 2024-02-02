@@ -1,0 +1,78 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 02/02/2024 08:17:44
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  START:                  ; first instruction of program
+00001000                             9  
+00001000                            10  * Put program code here
+00001000= 000001F4                  11  PlayerPoints    DC.L 500         ; Player Points
+00001004= 0064                      12  PlayerHealth    DC.W $64         ; Player Health (hexadecimal equivalent of 100)
+00001006= 0064                      13  PlayerXPos      DC.W 100         ; Player X Position
+00001008= 00C8                      14  PlayerYPos      DC.W 200         ; Player Y Position
+0000100A                            15  
+0000100A= 000003E8                  16  BossHealth      DC.L 1000        ; Boss Health
+0000100E= 01F4                      17  BossXPos        DC.W 500         ; Boss X Position
+00001010= 012C                      18  BossYPos        DC.W 300         ; Boss Y Position
+00001012                            19  
+00001012                            20  ; Perform data to memory operations using Address Registers
+00001012  207C 00000320             21      MOVE.L #800, A0                   ; A0 points to the memory location where the operation will occur
+00001018                            22  
+00001018                            23  ; Example 1: Move Player Points to memory
+00001018  20F8 1000                 24      MOVE.L PlayerPoints, (A0)+
+0000101C                            25  ; Example 2: Move Player Health to memory
+0000101C  10F8 1004                 26      MOVE.B PlayerHealth, (A0)+
+00001020                            27  ; Example 3: Move Player X Position to memory
+00001020  30F8 1006                 28      MOVE.W PlayerXPos, (A0)+
+00001024                            29  ; Example 4: Move Player Y Position to memory
+00001024  30F8 1008                 30      MOVE.W PlayerYPos, (A0)+
+00001028                            31  ; Example 5: Move Boss Health to memory
+00001028  20F8 100A                 32      MOVE.L BossHealth, (A0)+
+0000102C                            33  ; Example 6: Move Boss X Position to memory
+0000102C  30F8 100E                 34      MOVE.W BossXPos, (A0)+
+00001030                            35  ; Example 7: Move Boss Y Position to memory
+00001030  30F8 1010                 36      MOVE.W BossYPos, (A0)+
+00001034                            37      
+00001034                            38  ; Adjust values in memory if needed
+00001034                            39  ; Example 8: Increase Player Points by 100
+00001034  06B8 00000064 1000        40      ADD.L #100, PlayerPoints
+0000103C                            41  ; Example 9: Decrease Boss Health by 200
+0000103C  04B8 000000C8 100A        42      SUB.L #200, BossHealth
+00001044                            43  ; Verify changes in memory
+00001044  227C 00000320             44      MOVE.L #800, A1                   ; A1 points to the memory location for verification
+0000104A  2019                      45      MOVE.L (A1)+, D0                  ; Verify Player Points
+0000104C  1219                      46      MOVE.B (A1)+, D1                  ; Verify Player Health
+0000104E  3419                      47      MOVE.W (A1)+, D2                  ; Verify Player X Position
+00001050  3619                      48      MOVE.W (A1)+, D3                  ; Verify Player Y Position
+00001052  2819                      49      MOVE.L (A1)+, D4                  ; Verify Boss Health
+00001054  3A19                      50      MOVE.W (A1)+, D5                  ; Verify Boss X Position
+00001056  3C19                      51      MOVE.W (A1)+, D6                  ; Verify Boss Y Position
+00001058                            52  
+00001058                            53  
+00001058  FFFF FFFF                 54      SIMHALT             ; halt simulator
+0000105C                            55  
+0000105C                            56  * Put variables and constants here
+0000105C                            57  
+0000105C                            58      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BOSSHEALTH          100A
+BOSSXPOS            100E
+BOSSYPOS            1010
+PLAYERHEALTH        1004
+PLAYERPOINTS        1000
+PLAYERXPOS          1006
+PLAYERYPOS          1008
+START               1000
