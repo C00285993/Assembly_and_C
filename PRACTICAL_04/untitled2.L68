@@ -1,0 +1,37 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 06/02/2024 12:12:19
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Part 2
+00000000                             3  * Written by : Elvis Omorusi
+00000000                             4  * Date       :06/02/2024
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  START:        
+00001000  11FC 0064 3000             9      MOVE.B  #100, $3000
+00001006                            10      
+00001006  143C 000C                 11      MOVE.B #12, D2
+0000100A  163C 0016                 12      MOVE.B #22, D3
+0000100E                            13      
+0000100E  C602                      14      AND.B   D2, D3
+00001010                            15      
+00001010  43F8 3000                 16      LEA     $3000, A1
+00001014                            17      
+00001014  0411 0014                 18      SUB.B   #20, (A1)      
+00001018                            19      
+00001018  0611 000A                 20      ADD.B   #10, (A1)
+0000101C                            21          
+0000101C  FFFF FFFF                 22      SIMHALT             
+00001020                            23  
+00001020                            24      END    START        
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+START               1000
