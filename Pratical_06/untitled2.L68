@@ -1,0 +1,55 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 01/03/2024 09:59:14
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :Part 5
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8      
+00001000                             9  START:   
+00001000                            10       
+00001000  2F3C 00001034             11      MOVE.L  #HEALTH, -(SP)
+00001006  4EB9 00001010             12      JSR GAME_LOOP
+0000100C  6100 000C                 13      BSR HEADS_UP_DISPLAY
+00001010                            14      ;BRA END
+00001010                            15  
+00001010                            16  
+00001010                            17  GAME_LOOP:          
+00001010  226F 0004                 18          MOVEA.L 4(SP), A1
+00001014  0411 000A                 19          SUB.B   #10,(A1)
+00001018  4E75                      20          RTS
+0000101A                            21          
+0000101A                            22  HEADS_UP_DISPLAY:
+0000101A  43F9 00001035             23      LEA MESSAGE, A1
+00001020  103C 000E                 24      MOVE.B  #14, D0
+00001024  4E4F                      25      TRAP #15
+00001026  1239 00001034             26      MOVE.B  HEALTH, D1
+0000102C  103C 0003                 27      MOVE.B  #3,D0
+00001030  4E4F                      28      TRAP    #15
+00001032  4E75                      29      RTS
+00001034                            30  
+00001034= 64                        31  HEALTH: DC.B 100
+00001035= 48 65 61 6C 74 68 ...     32  MESSAGE: DC.B  'Health:', 0    
+0000103D                            33  
+0000103E  FFFF FFFF                 34      SIMHALT 
+00001042                            35             
+00001042                            36  
+00001042                            37  
+00001042                            38       END    START 
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+GAME_LOOP           1010
+HEADS_UP_DISPLAY    101A
+HEALTH              1034
+MESSAGE             1035
+START               1000
