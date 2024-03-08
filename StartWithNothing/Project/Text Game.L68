@@ -1,0 +1,1102 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 08/03/2024 16:50:35
+
+00000000                             1  *-------------------------------------------------------
+00000000                             2  * STARTING MEMORY ADDRESS FOR THE PROGRAMME $1000
+00000000                             3  *-------------------------------------------------------
+00000000                             4      
+00001000                             5      ORG $1000
+00001000                             6  
+00001000                             7  
+00001000                             8  *-------------------------------------------------------
+00001000                             9  *VALIDATION VALUES TO BE USED, MODIFY AS NEEDED
+00001000                            10  *ADD ADDITIONAL VALIDATION VALUES AS REQUIRED
+00001000                            11  *-------------------------------------------------------
+00001000  =00000000                 12  EXIT        EQU 0      USED TO EXIT ASSEMBLY PROGRAM
+00001000  =00000001                 13  MIN_POTIONS EQU 1      MIN NUMBER OF POTIONS
+00001000  =00000009                 14  MAX_POTIONS EQU 9      MAX NUMBER OF POTIONS
+00001000  =00000001                 15  MIN_WEAPONS EQU 1      MIN WEAPONS
+00001000  =00000003                 16  MAX_WEAPONS EQU 3      MAX WEAPONS
+00001000  =00000005                 17  WIN_POINT   EQU 5      POINTS ACCUMILATED ON WIN
+00001000  =00000008                 18  LOSE_POINT  EQU 8      POINTS DEDUCTED ON A LOSS
+00001000                            19  
+00001000  =00000064                 20  MINE_LOC    EQU 100    USED BELOW FOR SOME SIMPLE COLLISION DETECTION USING CMP
+00001000                            21                         * EXAMPLE FOR A HIT
+00001000                            22  
+00001000                            23  
+00001000                            24  *START OF GAME
+00001000                            25  START:
+00001000  11FC 0064 4000            26      MOVE.B  #100,$4000 PUT SCORE/HEALTH IN MEMORY LOCATION $4000
+00001006  47F8 4000                 27      LEA     $4000,A3   ASSIGN ADDRESS A3 TO THAT MEMORY LOCATION
+0000100A  11FC 0001 7000            28      MOVE.B  #1, $7000   ;Deafult weapon Daggers
+00001010  11FC 0064 6400            29      MOVE.B  #100, $6400 ;Enemy1 Health
+00001016  11FC 007D 6500            30      MOVE.B  #125, $6500 ;Enemy2 Health
+0000101C  31FC 00C8 6600            31      MOVE.W  #200, $6600 ;Enemy3 Health
+00001022  13FC 0014 00008000        32      MOVE.B  #20, $8000  ;PLAYER
+0000102A  13FC 0000 00009100        33      MOVE.B  #0, $9100   ;Potions
+00001032  6100 1FD6                 34      BSR     WELCOME    BRANCH TO THE WELCOME SUBROUTINE
+00001036  6100 1FFA                 35      BSR     INTRODUCTION   
+0000103A  6100 2016                 36      BSR     INTRODUCTION2 
+0000103E  6100 1FC0                 37      BSR     GAME       BRANCH TO THE GAME SUBROUTINE
+00001042                            38  *GAME LOOP
+00003000                            39      ORG     $3000      THE REST OF THE PROGRAM IS TO BE LOCATED FROM 3000 ONWARDS
+00003000                            40  
+00003000                            41  *-------------------------------------------------------
+00003000                            42  *-------------------GAME SUBROUTINE---------------------
+00003000                            43  *-------------------------------------------------------
+00003000                            44  GAME:
+00003000  6100 03CC                 45      BSR     SCENE1     BRANCH TO SCENE1SUBROUTINE
+00003004  4E75                      46      RTS                RETURN FROM GAME: SUBROUTINE
+00003006                            47            
+00003006                            48  END:
+00003006  FFFF FFFF                 49      SIMHALT
+0000300A                            50  
+0000300A                            51  *-------------------------------------------------------
+0000300A                            52  *-------------------WELCOME SUBROUTINE------------------
+0000300A                            53  *-------------------------------------------------------
+0000300A                            54  WELCOME:
+0000300A  6100 0758                 55      BSR     ENDL            BRANCH TO ENDL SUBROUTINE
+0000300E  43F9 0000377D             56      LEA     WELCOME_MSG,A1  ASSIGN MESSAGE TO ADDRESS REGISTER A1
+00003014  103C 000E                 57      MOVE.B  #14,D0          MOVE LITERAL 14 TO DO
+00003018  4E4F                      58      TRAP    #15             TRAP AND INTERPRET VALUE IN D0
+0000301A  43F9 00003946             59      LEA     CONTINUE_MSG, A1
+00003020  103C 000E                 60      MOVE.B  #14,D0          
+00003024  4E4F                      61      TRAP    #15
+00003026  103C 0004                 62      MOVE.B  #4,D0
+0000302A  4E4F                      63      TRAP    #15
+0000302C  6100 0736                 64      BSR     ENDL            BRANCH TO ENDL SUBROUTINE
+00003030  4E75                      65      RTS                     RETURN FROM WELCOME: SUBROUTINE
+00003032                            66  *INTRODUCTION
+00003032                            67  INTRODUCTION:
+00003032  6100 0702                 68      BSR     CLEAR_SCREEN
+00003036  6100 072C                 69      BSR     ENDL
+0000303A  43F9 0000395E             70      LEA     INTRODUCTION_MSG, A1
+00003040  103C 000E                 71      MOVE.B  #14,D0         
+00003044  4E4F                      72      TRAP    #15             
+00003046  103C 0004                 73      MOVE.B  #4,D0
+0000304A  4E4F                      74      TRAP    #15
+0000304C  6100 0716                 75      BSR     ENDL            
+00003050  4E75                      76      RTS  
+00003052                            77  INTRODUCTION2:
+00003052  6100 06E2                 78      BSR     CLEAR_SCREEN
+00003056  6100 070C                 79      BSR     ENDL
+0000305A  43F9 00003B06             80      LEA     INTRODUCTION2_MSG, A1
+00003060  103C 000E                 81      MOVE.B  #14,D0         
+00003064  4E4F                      82      TRAP    #15             
+00003066  103C 0004                 83      MOVE.B  #4,D0
+0000306A  4E4F                      84      TRAP    #15
+0000306C  6100 06F6                 85      BSR     ENDL            
+00003070  4E75                      86      RTS  
+00003072                            87  *-------------------------------------------------------
+00003072                            88  *---------GAMEPLAY INPUT VALUES SUBROUTINE--------------
+00003072                            89  *-------------------------------------------------------    
+00003072                            90  INPUT:
+00003072  6100 0066                 91      BSR     POTIONS         BRANCH TO POTION INPUT SUBROUTINE
+00003076  6100 019C                 92      BSR     WEAPONS         BRANCH TO WEAPONSS INPUT SUBROUTINE
+0000307A  4E75                      93      RTS
+0000307C                            94  
+0000307C                            95  *-------------------------------------------------------
+0000307C                            96  *----------------GAMELOOP (MAIN LOOP)-------------------
+0000307C                            97  *------------------------------------------------------- 
+0000307C                            98  GAMELOOP:
+0000307C  6100 0028                 99      BSR     UPDATE          BRANCH TO UPDATE GAME SUBROUTINE 
+00003080  6100 06B4                100      BSR     CLEAR_SCREEN    CLEARS THE SCREEN         
+00003084  6100 003A                101      BSR     DRAW            BRANCH TO DRAW SCREEN SUBROUTINE
+00003088  6100 06AC                102      BSR     CLEAR_SCREEN    CLEARS THE SCREEN
+0000308C  6100 0336                103      BSR     GAMEPLAY        BRANCH TO GAMEPLAY SUBROUTINE
+00003090  6100 06A4                104      BSR     CLEAR_SCREEN    CLEARS THE SCREEN
+00003094  6100 0624                105      BSR     HUD             BRANCH TO DISPLAY HUD SUBROUTINE
+00003098  6100 069C                106      BSR     CLEAR_SCREEN    CLEARS THE SCREEN
+0000309C  6100 06A4                107      BSR     REPLAY          BRANCH TO REPLAY GAME SUBROUTINE
+000030A0  6100 0694                108      BSR     CLEAR_SCREEN    CLEARS THE SCREEN
+000030A4  4E75                     109      RTS                     RETURN FROM GAMELOOP: SUBROUTINE
+000030A6                           110  
+000030A6                           111  *-------------------------------------------------------
+000030A6                           112  *----------------UPDATE QUEST PROGRESS------------------
+000030A6                           113  *  COMPLETE QUEST
+000030A6                           114  *------------------------------------------------------- 
+000030A6                           115  UPDATE:
+000030A6  6100 06BC                116      BSR     ENDL            PRINT A CR AND LF
+000030AA  6100 066C                117      BSR     DECORATE        DECORATE WITH DOTS USING A LOOP
+000030AE  43F9 000038D1            118      LEA     UPDATE_MSG,A1   
+000030B4  103C 000E                119      MOVE.B  #14,D0
+000030B8  4E4F                     120      TRAP    #15
+000030BA  6100 065C                121      BSR     DECORATE
+000030BE  4E75                     122      RTS
+000030C0                           123  *-------------------------------------------------------
+000030C0                           124  *-----------------DRAW QUEST UPDATES--------------------
+000030C0                           125  * DRAW THE GAME PROGRESS INFORMATION, STATUS REGARDING
+000030C0                           126  * QUEST
+000030C0                           127  *------------------------------------------------------- 
+000030C0                           128  DRAW:
+000030C0  6100 06A2                129      BSR     ENDL
+000030C4  6100 0652                130      BSR     DECORATE
+000030C8  43F9 000038E3            131      LEA     DRAW_MSG,A1
+000030CE  103C 000E                132      MOVE.B  #14,D0
+000030D2  4E4F                     133      TRAP    #15
+000030D4  6100 0642                134      BSR     DECORATE
+000030D8  4E75                     135      RTS
+000030DA                           136  
+000030DA                           137  *-------------------------------------------------------
+000030DA                           138  *--------------------POTIONS INVENTORY---------------------
+000030DA                           139  * NUMBER OF POTIONS TO BE USED IN A QUEST 
+000030DA                           140  *------------------------------------------------------- 
+000030DA                           141  POTIONS:
+000030DA  6100 0688                142      BSR     ENDL
+000030DE  6100 0638                143      BSR     DECORATE
+000030E2  43F9 0000383B            144      LEA     POTIONS_MSG,A1
+000030E8  103C 000E                145      MOVE.B  #14,D0
+000030EC  4E4F                     146      TRAP    #15
+000030EE  6100 0628                147      BSR     DECORATE
+000030F2  43F9 00003946            148      LEA     CONTINUE_MSG, A1
+000030F8  103C 000E                149      MOVE.B  #14,D0          
+000030FC  4E4F                     150      TRAP    #15
+000030FE  103C 0004                151      MOVE.B  #4,D0
+00003102  4E4F                     152      TRAP    #15
+00003104  4E75                     153      RTS
+00003106                           154  POTIONCHECKER:
+00003106  123C 0000                155      MOVE.B #0,D1
+0000310A  1239 00009000            156      MOVE.B $9000,D1
+00003110  B27C 003C                157      CMP #60,D1
+00003114                           158      ;BLE POTIONUSED1
+00003114                           159      ;BGE POTIONDENY
+00003114                           160  POTIONDENY:
+00003114                           161      ;LEA POTIONSNO,A1
+00003114  103C 000E                162      MOVE.B #14,D0
+00003118  4E4F                     163      TRAP #15
+0000311A  103C 0004                164      MOVE.B #4 ,D0
+0000311E  4E4F                     165      TRAP #15
+00003120                           166      ;BRA COMBAT
+00003120                           167  POTIONDENY1:
+00003120                           168      ;LEA POTIONSNO1,A1
+00003120  103C 000E                169      MOVE.B #14,D0
+00003124  4E4F                     170      TRAP #15
+00003126  103C 0004                171      MOVE.B #4 ,D0
+0000312A  4E4F                     172      TRAP #15
+0000312C  6000 002A                173      BRA COMBAT
+00003130                           174  POTIONUSED1:
+00003130  1A3C 0000                175      MOVE.B #0,D5
+00003134  5345                     176      SUB #1,D5
+00003136  13C5 00009100            177      MOVE.B D5,$9100
+0000313C  6000 001A                178      BRA COMBAT
+00003140                           179  POTIONUSED:
+00003140                           180      ;LEA POTIONDRANK,A1
+00003140  303C 000E                181      MOVE #14,D0
+00003144  4E4F                     182      TRAP #15
+00003146  303C 0004                183      MOVE #4,D0
+0000314A  4E4F                     184      TRAP #15
+0000314C  0639 0028 00009000       185      ADD.B #40,$9000
+00003154  6000 0002                186      BRA COMBAT
+00003158                           187  *-------------------------------------------------------
+00003158                           188  *--------------------Conbat---------------------
+00003158                           189  *------------------------------------------------------- 
+00003158                           190  COMBAT:
+00003158  43F9 00004A99            191      LEA COMBAT_MSG,A1
+0000315E  123C 0000                192      MOVE.B #0,D1
+00003162  103C 000E                193      MOVE.B #14,D0
+00003166  4E4F                     194      TRAP #15
+00003168  103C 0004                195      MOVE.B #4,D0
+0000316C  4E4F                     196      TRAP #15
+0000316E  B27C 0000                197      CMP  #0,D1
+00003172                           198      ;BEQ  CHECKER
+00003172  B27C 0001                199      CMP  #1,D1
+00003176                           200      ;BEQ  AMOUNTOFPOTIONS
+00003176  B27C 0002                201      CMP  #2,D1
+0000317A                           202      ;BEQ  WEAPONS
+0000317A  B27C 0003                203      CMP  #3,D1
+0000317E  6600 0056                204      BNE SELECTC
+00003182                           205  
+00003182                           206  COMBAT2:
+00003182  43F9 00004A99            207      LEA COMBAT_MSG,A1
+00003188  123C 0000                208      MOVE.B #0,D1
+0000318C  103C 000E                209      MOVE.B #14,D0
+00003190  4E4F                     210      TRAP #15
+00003192  103C 0004                211      MOVE.B #4,D0
+00003196  4E4F                     212      TRAP #15
+00003198  B27C 0000                213      CMP  #0,D1
+0000319C                           214      ;BEQ  CHECKER
+0000319C  B27C 0001                215      CMP  #1,D1
+000031A0                           216      ;BEQ  AMOUNTOFPOTIONS
+000031A0  B27C 0002                217      CMP  #2,D1
+000031A4                           218      ;BEQ  WEAPONS2
+000031A4  B27C 0003                219      CMP  #3,D1
+000031A8  6600 0042                220      BNE SELECTC2
+000031AC                           221  
+000031AC                           222  COMBAT3:
+000031AC  43F9 00004A99            223      LEA COMBAT_MSG,A1
+000031B2  123C 0000                224      MOVE.B #0,D1
+000031B6  103C 000E                225      MOVE.B #14,D0
+000031BA  4E4F                     226      TRAP #15
+000031BC  103C 0004                227      MOVE.B #4,D0
+000031C0  4E4F                     228      TRAP #15
+000031C2  B27C 0000                229      CMP  #0,D1
+000031C6                           230      ;BEQ  CHECKER
+000031C6  B27C 0001                231      CMP  #1,D1
+000031CA                           232      ;BEQ  AMOUNTOFPOTIONS
+000031CA  B27C 0002                233      CMP  #2,D1
+000031CE                           234      ;BEQ  WEAPONS3
+000031CE  B27C 0003                235      CMP  #3,D1
+000031D2  6600 002C                236      BNE SELECTC3    
+000031D6                           237      
+000031D6                           238   
+000031D6                           239  SELECTC:
+000031D6  43F9 00004A1C            240      LEA SELECT,A1
+000031DC  303C 000E                241      MOVE #14,D0
+000031E0  4E4F                     242      TRAP #15
+000031E2  303C 0004                243      MOVE #4,D0
+000031E6  4E4F                     244      TRAP #15
+000031E8  6000 FF6E                245      BRA COMBAT
+000031EC                           246  SELECTC2:
+000031EC  43F9 00004A1C            247      LEA SELECT,A1
+000031F2  303C 000E                248      MOVE #14,D0
+000031F6  4E4F                     249      TRAP #15
+000031F8  303C 0004                250      MOVE #4,D0
+000031FC  4E4F                     251      TRAP #15
+000031FE  6082                     252      BRA COMBAT2
+00003200                           253  SELECTC3
+00003200  43F9 00004A1C            254      LEA SELECT,A1
+00003206  303C 000E                255      MOVE #14,D0
+0000320A  4E4F                     256      TRAP #15
+0000320C  303C 0004                257      MOVE #4,D0
+00003210  4E4F                     258      TRAP #15
+00003212  6098                     259      BRA COMBAT3
+00003214                           260  *-------------------------------------------------------
+00003214                           261  *-------------------------WEAPONS-----------------------
+00003214                           262  * NUMBER OF WEAPONS
+00003214                           263  *-------------------------------------------------------   
+00003214                           264  WEAPONS:
+00003214  6100 054E                265      BSR     ENDL
+00003218  6100 04FE                266      BSR     DECORATE
+0000321C  1638 7000                267      MOVE.B  $7000, D3
+00003220  43F9 000049CF            268      LEA     CHANGEWEAPON,A1
+00003226  103C 000E                269      MOVE.B  #14,D0
+0000322A  4E4F                     270      TRAP    #15
+0000322C  103C 0004                271      MOVE.B  #4, D0
+00003230  4E4F                     272      TRAP    #15
+00003232  1401                     273      MOVE.B  D1, D2
+00003234  11C2 7000                274      MOVE.B  D2, $7000
+00003238  B67C 0001                275      CMP     #1, D3
+0000323C  6700 0010                276      BEQ     DAGGERATTACK    
+00003240  B67C 0002                277      CMP     #2, D3
+00003244  6700 0030                278      BEQ     SWORDSATTACK
+00003248  6100 04CE                279      BSR     DECORATE
+0000324C  60C6                     280      BRA     WEAPONS
+0000324E                           281  DAGGERATTACK:
+0000324E  183C 0000                282      MOVE.B #0, D4
+00003252  1839 00008000            283      MOVE.B $8000, D4
+00003258  43F9 00004A50            284      LEA DAGATTACK, A1
+0000325E  303C 000E                285      MOVE #14,D0
+00003262  4E4F                     286      TRAP #15
+00003264  303C 0004                287      MOVE #4,D0
+00003268  4E4F                     288      TRAP #15
+0000326A  0444 000F                289      SUB #15,D4
+0000326E  11C4 6400                290      MOVE.B D4,$6400
+00003272  6000 FEE4                291      BRA COMBAT
+00003276                           292  SWORDSATTACK:
+00003276  183C 0000                293      MOVE.B #0,D4
+0000327A  1839 00008000            294      MOVE.B $8000, D4 
+00003280  43F9 00004A7A            295      LEA SWOATTACK,A1
+00003286  303C 000E                296      MOVE #14,D0
+0000328A  4E4F                     297      TRAP #15
+0000328C  303C 0004                298      MOVE #4,D0
+00003290  4E4F                     299      TRAP #15
+00003292  0444 0032                300      SUB #50,D4
+00003296  11F8 0004 6400           301      MOVE.B 4, $6400
+0000329C  6000 FEBA                302      BRA COMBAT
+000032A0                           303  WEAPONS2:
+000032A0  6100 04C2                304      BSR     ENDL
+000032A4  6100 0472                305      BSR     DECORATE
+000032A8  1638 7000                306      MOVE.B  $7000, D3
+000032AC  43F9 000049CF            307      LEA     CHANGEWEAPON,A1
+000032B2  103C 000E                308      MOVE.B  #14,D0
+000032B6  4E4F                     309      TRAP    #15
+000032B8  103C 0004                310      MOVE.B  #4, D0
+000032BC  4E4F                     311      TRAP    #15
+000032BE  1401                     312      MOVE.B  D1, D2
+000032C0  11C2 7000                313      MOVE.B  D2, $7000
+000032C4  B67C 0001                314      CMP     #1, D3
+000032C8  6700 0012                315      BEQ     DAGGERATTACK2    
+000032CC  B67C 0002                316      CMP     #2, D3
+000032D0  6700 0034                317      BEQ     SWORDSATTACK2
+000032D4  6100 0442                318      BSR     DECORATE
+000032D8  6000 FF3A                319      BRA     WEAPONS
+000032DC                           320  DAGGERATTACK2:
+000032DC  183C 0000                321      MOVE.B #0,D4
+000032E0  1839 00008000            322      MOVE.B $8000,D4
+000032E6  43F9 00004A65            323      LEA DAGATTACK2,A1
+000032EC  303C 000E                324      MOVE #14,D0
+000032F0  4E4F                     325      TRAP #15
+000032F2  303C 0004                326      MOVE #4,D0
+000032F6  4E4F                     327      TRAP #15
+000032F8  0444 0023                328      SUB #35,D4
+000032FC  13C4 00008000            329      MOVE.B D4,$8000
+00003302  6000 FE7E                330      BRA COMBAT2
+00003306                           331  SWORDSATTACK2:
+00003306  183C 0000                332      MOVE.B #0,D4
+0000330A  1839 00008000            333      MOVE.B $8000, D4 
+00003310  43F9 00004A7A            334      LEA SWOATTACK,A1
+00003316  303C 000E                335      MOVE #14,D0
+0000331A  4E4F                     336      TRAP #15
+0000331C  303C 0004                337      MOVE #4,D0
+00003320  4E4F                     338      TRAP #15
+00003322  0444 0032                339      SUB #50,D4
+00003326  13F8 0004 00008000       340      MOVE.B 4, $8000
+0000332E  6000 FE52                341      BRA COMBAT2
+00003332                           342  WEAPONS3:
+00003332  6100 0430                343      BSR     ENDL
+00003336  6100 03E0                344      BSR     DECORATE
+0000333A  1638 7000                345      MOVE.B  $7000, D3
+0000333E  43F9 000049CF            346      LEA     CHANGEWEAPON,A1
+00003344  103C 000E                347      MOVE.B  #14,D0
+00003348  4E4F                     348      TRAP    #15
+0000334A  103C 0004                349      MOVE.B  #4, D0
+0000334E  4E4F                     350      TRAP    #15
+00003350  1401                     351      MOVE.B  D1, D2
+00003352  11C2 7000                352      MOVE.B  D2, $7000
+00003356  B67C 0001                353      CMP     #1, D3
+0000335A  6700 0012                354      BEQ     DAGGERATTACK3  
+0000335E  B67C 0002                355      CMP     #2, D3
+00003362  6700 0034                356      BEQ     SWORDSATTACK3
+00003366  6100 03B0                357      BSR     DECORATE
+0000336A  6000 FEA8                358      BRA     WEAPONS
+0000336E                           359  DAGGERATTACK3:
+0000336E  183C 0000                360      MOVE.B #0,D4
+00003372  1839 00008000            361      MOVE.B $8000,D4
+00003378  43F9 00004A65            362      LEA DAGATTACK2,A1
+0000337E  303C 000E                363      MOVE #14,D0
+00003382  4E4F                     364      TRAP #15
+00003384  303C 0004                365      MOVE #4,D0
+00003388  4E4F                     366      TRAP #15
+0000338A  0444 0023                367      SUB #35,D4
+0000338E  13C4 00008000            368      MOVE.B D4,$8000
+00003394  6000 FE16                369      BRA COMBAT3
+00003398                           370  SWORDSATTACK3:
+00003398  183C 0000                371      MOVE.B #0,D4
+0000339C  1839 00008000            372      MOVE.B $8000, D4 
+000033A2  43F9 00004A7A            373      LEA SWOATTACK,A1
+000033A8  303C 000E                374      MOVE #14,D0
+000033AC  4E4F                     375      TRAP #15
+000033AE  303C 0004                376      MOVE #4,D0
+000033B2  4E4F                     377      TRAP #15
+000033B4  0444 0032                378      SUB #50,D4
+000033B8  13F8 0004 00008000       379      MOVE.B 4, $8000
+000033C0  6000 FDEA                380      BRA COMBAT3
+000033C4                           381  *-------------------------------------------------------
+000033C4                           382  *---GAME PLAY (QUEST PROGRESS)--------------------------
+000033C4                           383  *------------------------------------------------------- 
+000033C4                           384  GAMEPLAY:
+000033C4  6100 039E                385      BSR     ENDL
+000033C8  6100 034E                386      BSR     DECORATE
+000033CC                           387      
+000033CC  4E75                     388      RTS
+000033CE                           389      
+000033CE                           390      
+000033CE                           391  ; Scene 1
+000033CE                           392  SCENE1:
+000033CE  6100 0366                393      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000033D2  43F9 00003D57            394      LEA     Scene1_MSG, A1     ; Load address of Scene1_MSG message into A1
+000033D8  103C 000E                395      MOVE.B  #14, D0            ; Set D0 to 14 
+000033DC  4E4F                     396      TRAP    #15                ; Execute trap to display the message
+000033DE  103C 0004                397      MOVE.B  #4, D0             ; Set D0 to 4 
+000033E2  4E4F                     398      TRAP    #15                ; Execute trap to read user input
+000033E4  43F9 00003E84            399      LEA     SCENECHOICE1, A1   ; Load address of SCENECHOICE1 message into A1
+000033EA  103C 000E                400      MOVE.B  #14, D0            ; Set D0 to 14
+000033EE  4E4F                     401      TRAP    #15                ; Execute trap to display the message
+000033F0  103C 0004                402      MOVE.B  #4, D0             ; Set D0 to 4 
+000033F4  4E4F                     403      TRAP    #15                ; Execute trap to read user input
+000033F6  B27C 0001                404      CMP     #1, D1             ; Compare user input with 1
+000033FA  6700 0022                405      BEQ     SN1CHOICE1         ; Branch to SN1CHOICE1 if equal
+000033FE  B27C 0002                406      CMP     #2, D1             ; Compare user input with 2
+00003402  6700 0030                407      BEQ     SN1CHOICE2         ; Branch to SN1CHOICE2 if equal
+00003406  6600 0002                408      BNE     SELECT1            ; Branch to SELECT1 if not equal
+0000340A                           409  
+0000340A                           410  ; Scene 1 - Select
+0000340A                           411  SELECT1:
+0000340A  43F9 00004A1C            412      LEA     SELECT, A1         ; Load address of SELECT message into A1
+00003410  303C 000E                413      MOVE    #14, D0            ; Set D0 to 14 
+00003414  4E4F                     414      TRAP    #15                ; Execute trap to display the message
+00003416  303C 0004                415      MOVE    #4, D0             ; Set D0 to 4 
+0000341A  4E4F                     416      TRAP    #15                ; Execute trap to read user input
+0000341C  60B0                     417      BRA     SCENE1             ; Branch to SCENE1
+0000341E                           418  
+0000341E                           419  ; Scene 1 - Choice 1
+0000341E                           420  SN1CHOICE1:
+0000341E  6100 0316                421      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003422  43F9 00003ECC            422      LEA     SCE1CHOICE1, A1    ; Load address of SCE1CHOICE1 message into A1
+00003428  103C 000E                423      MOVE.B  #14, D0            ; Set D0 to 14 
+0000342C  4E4F                     424      TRAP    #15                ; Execute trap to display the message
+0000342E  103C 0004                425      MOVE.B  #4, D0             ; Set D0 to 4 
+00003432  4E4F                     426      TRAP    #15                ; Execute trap to read user input
+00003434                           427      ;BRA     COMBAT            ; Uncomment to branch to COMBAT
+00003434                           428  
+00003434                           429  ; Scene 1 - Choice 2
+00003434                           430  SN1CHOICE2:
+00003434  6100 0300                431      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003438  43F9 00003F09            432      LEA     SCE1CHOICE2, A1    ; Load address of SCE1CHOICE2 message into A1
+0000343E  103C 000E                433      MOVE.B  #14, D0            ; Set D0 to 14 
+00003442  4E4F                     434      TRAP    #15                ; Execute trap to display the message
+00003444  103C 0004                435      MOVE.B  #4, D0             ; Set D0 to 4 
+00003448  4E4F                     436      TRAP    #15                ; Execute trap to read user input
+0000344A  6000 0002                437      BRA     SCENE2             ; Branch to SCENE2
+0000344E                           438  
+0000344E                           439  ; Scene 2
+0000344E                           440  SCENE2:
+0000344E  6100 02E6                441      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003452  43F9 00003FAA            442      LEA     Scene2_MSG, A1     ; Load address of Scene2_MSG message into A1
+00003458  103C 000E                443      MOVE.B  #14, D0            ; Set D0 to 14 
+0000345C  4E4F                     444      TRAP    #15                ; Execute trap to display the message
+0000345E  103C 0004                445      MOVE.B  #4, D0             ; Set D0 to 4 
+00003462  4E4F                     446      TRAP    #15                ; Execute trap to read user input
+00003464                           447      ;BRA     COMBAT2            ; Uncomment to branch to COMBAT2
+00003464                           448  
+00003464                           449  ; Scene 3
+00003464                           450  SCENE3:
+00003464  6100 02D0                451      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003468  43F9 00004007            452      LEA     Scene3_MSG, A1     ; Load address of Scene3_MSG message into A1
+0000346E  103C 000E                453      MOVE.B  #14, D0            ; Set D0 to 14 
+00003472  4E4F                     454      TRAP    #15                ; Execute trap to display the message
+00003474  103C 0004                455      MOVE.B  #4, D0             ; Set D0 to 4 
+00003478  4E4F                     456      TRAP    #15                ; Execute trap to read user input
+0000347A  43F9 000040F0            457      LEA     SCENE3CHOICE1, A1   ; Load address of SCENE3CHOICE1 message into A1
+00003480  103C 000E                458      MOVE.B  #14, D0            ; Set D0 to 14 
+00003484  4E4F                     459      TRAP    #15                ; Execute trap to display the message
+00003486  103C 0004                460      MOVE.B  #4, D0             ; Set D0 to 4 
+0000348A  4E4F                     461      TRAP    #15                ; Execute trap to read user input
+0000348C  B27C 0001                462      CMP     #1, D1             ; Compare user input with 1
+00003490  6700 0022                463      BEQ     SN3CHOICE1         ; Branch to SN3CHOICE1 if equal
+00003494  B27C 0002                464      CMP     #2, D1             ; Compare user input with 2
+00003498  6700 0030                465      BEQ     SN3CHOICE2         ; Branch to SN3CHOICE2 if equal
+0000349C  6600 0002                466      BNE     SELECT3            ; Branch to SELECT3 if not equal
+000034A0                           467  
+000034A0                           468  ; Scene 3 - Select
+000034A0                           469  SELECT3:
+000034A0  43F9 00004A1C            470      LEA     SELECT, A1         ; Load address of SELECT message into A1
+000034A6  303C 000E                471      MOVE    #14, D0            ; Set D0 to 14 
+000034AA  4E4F                     472      TRAP    #15                ; Execute trap to display the message
+000034AC  303C 0004                473      MOVE    #4, D0             ; Set D0 to 4 
+000034B0  4E4F                     474      TRAP    #15                ; Execute trap to read user input
+000034B2  60B0                     475      BRA     SCENE3             ; Branch to SCENE3
+000034B4                           476  
+000034B4                           477  ; Scene 3 - Choice 1
+000034B4                           478  SN3CHOICE1:
+000034B4  6100 0280                479      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000034B8  43F9 0000411C            480      LEA     SCE3CHOICE1, A1    ; Load address of SCE3CHOICE1 message into A1
+000034BE  103C 000E                481      MOVE.B  #14, D0            ; Set D0 to 14 
+000034C2  4E4F                     482      TRAP    #15                ; Execute trap to display the message
+000034C4  103C 0004                483      MOVE.B  #4, D0             ; Set D0 to 4 
+000034C8  4E4F                     484      TRAP    #15                ; Execute trap to read user input
+000034CA                           485      ;BRA     COMBAT3            ; Uncomment to branch to COMBAT3
+000034CA                           486  
+000034CA                           487  ; Scene 3 - Choice 2
+000034CA                           488  SN3CHOICE2:
+000034CA  6100 026A                489      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000034CE  43F9 00004144            490      LEA     SCE3CHOICE2, A1    ; Load address of SCE3CHOICE2 message into A1
+000034D4  103C 000E                491      MOVE.B  #14, D0            ; Set D0 to 14 
+000034D8  4E4F                     492      TRAP    #15                ; Execute trap to display the message
+000034DA  103C 0004                493      MOVE.B  #4, D0             ; Set D0 to 4 
+000034DE  4E4F                     494      TRAP    #15                ; Execute trap to read user input
+000034E0  6000 0002                495      BRA     SCENE4             ; Branch to SCENE4
+000034E4                           496      
+000034E4                           497      
+000034E4                           498  
+000034E4                           499  
+000034E4                           500  
+000034E4                           501  ; Scene 4
+000034E4                           502  SCENE4:
+000034E4  6100 0250                503      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000034E8  43F9 00004157            504      LEA     Scene4_MSG, A1     ; Load address of Scene4_MSG message into A1
+000034EE  103C 000E                505      MOVE.B  #14, D0            ; Set D0 to 14 
+000034F2  4E4F                     506      TRAP    #15                ; Execute trap to display the message
+000034F4  103C 0004                507      MOVE.B  #4, D0             ; Set D0 to 4 
+000034F8  4E4F                     508      TRAP    #15                ; Execute trap to read user input
+000034FA  43F9 000043C3            509      LEA     SCENE4CHOICE, A1   ; Load address of SCENE4CHOICE message into A1
+00003500  103C 000E                510      MOVE.B  #14, D0            ; Set D0 to 14
+00003504  4E4F                     511      TRAP    #15                ; Execute trap to display the message
+00003506  103C 0004                512      MOVE.B  #4, D0             ; Set D0 to 4 
+0000350A  4E4F                     513      TRAP    #15                ; Execute trap to read user input
+0000350C  B27C 0001                514      CMP     #1, D1             ; Compare user input with 1
+00003510  6700 000E                515      BEQ     SN4CHOICE1         ; Branch to SN4CHOICE1 if equal
+00003514  B27C 0002                516      CMP     #2, D1             ; Compare user input with 2
+00003518  6700 0024                517      BEQ     SN4CHOICE2         ; Branch to SN4CHOICE2 if equal
+0000351C  6600 006E                518      BNE     SELECT4            ; Branch to SELECT4 if not equal
+00003520                           519  
+00003520                           520  ; Scene 4 - Choice 1
+00003520                           521  SN4CHOICE1:
+00003520  6100 0214                522      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003524  43F9 000043E2            523      LEA     SCE4ATTACK, A1     ; Load address of SCE4ATTACK message into A1
+0000352A  103C 000E                524      MOVE.B  #14, D0            ; Set D0 to 14 
+0000352E  4E4F                     525      TRAP    #15                ; Execute trap to display the message
+00003530  103C 0004                526      MOVE.B  #4, D0             ; Set D0 to 4
+00003534  4E4F                     527      TRAP    #15                ; Execute trap to read user input
+00003536  6000 FC20                528      BRA     COMBAT             ; Branch to COMBAT
+0000353A  6000 001C                529      BRA     SCENE4PART1        ; Branch to SCENE4PART1
+0000353E                           530  
+0000353E                           531  ; Scene 4 - Choice 2
+0000353E                           532  SN4CHOICE2:
+0000353E  6100 01F6                533      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003542  43F9 00004412            534      LEA     SCE4RUNAWAY, A1    ; Load address of SCE4RUNAWAY message into A1
+00003548  103C 000E                535      MOVE.B  #14, D0            ; Set D0 to 14 
+0000354C  4E4F                     536      TRAP    #15                ; Execute trap to display the message
+0000354E  103C 0004                537      MOVE.B  #4, D0             ; Set D0 to 4 
+00003552  4E4F                     538      TRAP    #15                ; Execute trap to read user input
+00003554  6000 001C                539      BRA     SCENE4PART2        ; Branch to SCENE4PART2
+00003558                           540  
+00003558                           541  ; Scene 4 - Part 1
+00003558                           542  SCENE4PART1:
+00003558  6100 01DC                543      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+0000355C  43F9 0000445E            544      LEA     SCENE4AFTERFIGHT, A1 ; Load address of SCENE4AFTERFIGHT message into A1
+00003562  103C 000E                545      MOVE.B  #14, D0            ; Set D0 to 14 
+00003566  4E4F                     546      TRAP    #15                ; Execute trap to display the message
+00003568  103C 0004                547      MOVE.B  #4, D0             ; Set D0 to 4 
+0000356C  4E4F                     548      TRAP    #15                ; Execute trap to read user input
+0000356E  6000 0032                549      BRA     SCENE5             ; Branch to SCENE5
+00003572                           550  
+00003572                           551  ; Scene 4 - Part 2
+00003572                           552  SCENE4PART2:
+00003572  6100 01C2                553      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003576  43F9 000044A7            554      LEA     SCENE4RUNAWAY, A1  ; Load address of SCENE4RUNAWAY message into A1
+0000357C  103C 000E                555      MOVE.B  #14, D0            ; Set D0 to 14 
+00003580  4E4F                     556      TRAP    #15                ; Execute trap to display the message
+00003582  103C 0004                557      MOVE.B  #4, D0             ; Set D0 to 4 
+00003586  4E4F                     558      TRAP    #15                ; Execute trap to read user input
+00003588  6000 0018                559      BRA     SCENE5             ; Branch to SCENE5
+0000358C                           560  
+0000358C                           561  ; Scene 4 - Select
+0000358C                           562  SELECT4:
+0000358C  43F9 00004A1C            563      LEA     SELECT, A1         ; Load address of SELECT message into A1
+00003592  303C 000E                564      MOVE    #14, D0            ; Set D0 to 14 
+00003596  4E4F                     565      TRAP    #15                ; Execute trap to display the message
+00003598  303C 0004                566      MOVE    #4, D0             ; Set D0 to 4 
+0000359C  4E4F                     567      TRAP    #15                ; Execute trap to read user input
+0000359E  6000 FF44                568      BRA     SCENE4             ; Branch to SCENE4
+000035A2                           569  
+000035A2                           570  ; Scene 5
+000035A2                           571  SCENE5:
+000035A2  6100 0192                572      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000035A6  43F9 000044F8            573      LEA     Scene5_MSG, A1     ; Load address of Scene5_MSG message into A1
+000035AC  103C 000E                574      MOVE.B  #14, D0            ; Set D0 to 14 
+000035B0  4E4F                     575      TRAP    #15                ; Execute trap to display the message
+000035B2  103C 0004                576      MOVE.B  #4, D0             ; Set D0 to 4 
+000035B6  4E4F                     577      TRAP    #15                ; Execute trap to read user input
+000035B8  43F9 000045CD            578      LEA     SCENE5CHOICE1, A1  ; Load address of SCENE5CHOICE1 message into A1
+000035BE  103C 000E                579      MOVE.B  #14, D0            ; Set D0 to 14 
+000035C2  4E4F                     580      TRAP    #15                ; Execute trap to display the message
+000035C4  103C 0004                581      MOVE.B  #4, D0             ; Set D0 to 4 
+000035C8  4E4F                     582      TRAP    #15                ; Execute trap to read user input
+000035CA  B27C 0001                583      CMP     #1, D1             ; Compare user input with 1
+000035CE  6700 000E                584      BEQ     SN5CHOICE1         ; Branch to SN5CHOICE1 if equal
+000035D2  B27C 0002                585      CMP     #2, D1             ; Compare user input with 2
+000035D6  6700 0020                586      BEQ     SN5CHOICE2         ; Branch to SN5CHOICE2 if equal
+000035DA  6600 0036                587      BNE     SELECT5            ; Branch to SELECT5 if not equal
+000035DE                           588  
+000035DE                           589  ; Scene 5 - Choice 1
+000035DE                           590  SN5CHOICE1:
+000035DE  6100 0156                591      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000035E2  43F9 000045E8            592      LEA     SCE5ACC, A1        ; Load address of SCE5ACC message into A1
+000035E8  103C 000E                593      MOVE.B  #14, D0            ; Set D0 to 14 
+000035EC  4E4F                     594      TRAP    #15                ; Execute trap to display the message
+000035EE  103C 0004                595      MOVE.B  #4, D0             ; Set D0 to 4 
+000035F2  4E4F                     596      TRAP    #15                ; Execute trap to read user input
+000035F4  6000 0032                597      BRA     SCENE6             ; Branch to SCENE6
+000035F8                           598  
+000035F8                           599  ; Scene 5 - Choice 2
+000035F8                           600  SN5CHOICE2:
+000035F8  6100 013C                601      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+000035FC  43F9 00004689            602      LEA     SCE5REJECT, A1     ; Load address of SCE5REJECT message into A1
+00003602  103C 000E                603      MOVE.B  #14, D0            ; Set D0 to 14 
+00003606  4E4F                     604      TRAP    #15                ; Execute trap to display the message
+00003608  103C 0004                605      MOVE.B  #4, D0             ; Set D0 to 4 
+0000360C  4E4F                     606      TRAP    #15                ; Execute trap to read user input
+0000360E  6000 0018                607      BRA     SCENE6             ; Branch to SCENE6
+00003612                           608  
+00003612                           609  ; Scene 5 - Select
+00003612                           610  SELECT5:
+00003612  43F9 00004A1C            611      LEA     SELECT, A1         ; Load address of SELECT message into A1
+00003618  303C 000E                612      MOVE    #14, D0            ; Set D0 to 14 
+0000361C  4E4F                     613      TRAP    #15                ; Execute trap to display the message
+0000361E  303C 0004                614      MOVE    #4, D0             ; Set D0 to 4
+00003622  4E4F                     615      TRAP    #15                ; Execute trap to read user input
+00003624  6000 FF7C                616      BRA     SCENE5             ; Branch to SCENE5
+00003628                           617  
+00003628                           618  ; Scene 6
+00003628                           619  SCENE6:
+00003628  6100 010C                620      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+0000362C  43F9 00004737            621      LEA     Scene6_MSG, A1     ; Load address of Scene6_MSG message into A1
+00003632  103C 000E                622      MOVE.B  #14, D0            ; Set D0 to 14 
+00003636  4E4F                     623      TRAP    #15                ; Execute trap to display the message
+00003638  103C 0004                624      MOVE.B  #4, D0             ; Set D0 to 4 
+0000363C  4E4F                     625      TRAP    #15                ; Execute trap to read user input
+0000363E  43F9 00004822            626      LEA     SCE6CHOICE, A1     ; Load address of SCE6CHOICE message into A1
+00003644  103C 000E                627      MOVE.B  #14, D0            ; Set D0 to 14 
+00003648  4E4F                     628      TRAP    #15                ; Execute trap to display the message
+0000364A  103C 0004                629      MOVE.B  #4, D0             ; Set D0 to 4 
+0000364E  4E4F                     630      TRAP    #15                ; Execute trap to read user input
+00003650  B27C 0001                631      CMP     #1, D1             ; Compare user input with 1
+00003654  6700 000E                632      BEQ     SN6CHOICE1         ; Branch to SN6CHOICE1 if equal
+00003658  B27C 0002                633      CMP     #2, D1             ; Compare user input with 2
+0000365C  6700 001C                634      BEQ     SN6CHOICE2         ; Branch to SN6CHOICE2 if equal
+00003660  6600 002E                635      BNE     SELECT6            ; Branch to SELECT6 if not equal
+00003664                           636  
+00003664                           637  ; Scene 6 - Choice 1
+00003664                           638  SN6CHOICE1:
+00003664  6100 00D0                639      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+00003668  43F9 0000484A            640      LEA     SCE6ATTACK, A1     ; Load address of SCE6ATTACK message into A1
+0000366E  103C 000E                641      MOVE.B  #14, D0            ; Set D0 to 14 
+00003672  4E4F                     642      TRAP    #15                ; Execute trap to display the message
+00003674  103C 0004                643      MOVE.B  #4, D0             ; Set D0 to 4 
+00003678  4E4F                     644      TRAP    #15                ; Execute trap to read user input
+0000367A                           645      ;BRA     COMBAT3            ; Branch to COMBAT3
+0000367A                           646  
+0000367A                           647  ; Scene 6 - Choice 2
+0000367A                           648  SN6CHOICE2:
+0000367A  6100 00BA                649      BSR     CLEAR_SCREEN       ; Call function to clear the screen
+0000367E  43F9 0000485E            650      LEA     SCE6SNEAK, A1      ; Load address of SCE6SNEAK message into A1
+00003684  103C 000E                651      MOVE.B  #14, D0            ; Set D0 to 14 
+00003688  4E4F                     652      TRAP    #15                ; Execute trap to display the message
+0000368A  103C 0004                653      MOVE.B  #4, D0             ; Set D0 to 4 
+0000368E  4E4F                     654      TRAP    #15                ; Execute trap to read user input
+00003690                           655      ;BRA     COMBAT3            ; Branch to COMBAT3
+00003690                           656  
+00003690                           657  ; Scene 6 - Select
+00003690                           658  SELECT6:
+00003690  43F9 00004A1C            659      LEA     SELECT, A1         ; Load address of SELECT message into A1
+00003696  303C 000E                660      MOVE    #14, D0            ; Set D0 to 14 
+0000369A  4E4F                     661      TRAP    #15                ; Execute trap to display the message
+0000369C  303C 0004                662      MOVE    #4, D0             ; Set D0 to 4 
+000036A0  4E4F                     663      TRAP    #15                ; Execute trap to read user input
+000036A2  6084                     664      BRA     SCENE6             ; Branch to SCENE6
+000036A4                           665  
+000036A4                           666  SCENE7:
+000036A4  6100 0090                667      BSR  CLEAR_SCREEN
+000036A8  43F9 0000489E            668      LEA  Scene7_MSG, A1   
+000036AE  103C 000E                669      MOVE.B  #14,D0
+000036B2  4E4F                     670      TRAP    #15
+000036B4  103C 0004                671      MOVE.B  #4, D0
+000036B8  4E4F                     672      TRAP    #15
+000036BA                           673      
+000036BA                           674  
+000036BA                           675  
+000036BA                           676      
+000036BA                           677  *-------------------------------------------------------
+000036BA                           678  *-----------------HEADS UP DISPLAY (SCORE)--------------
+000036BA                           679  * RETRIEVES THE SCORE FROM MEMORY LOCATION
+000036BA                           680  *-------------------------------------------------------   
+000036BA                           681  HUD:
+000036BA                           682  
+000036BA  6100 00A8                683      BSR     ENDL
+000036BE  6100 0058                684      BSR     DECORATE
+000036C2  43F9 0000392F            685      LEA     HUD_MSG,A1
+000036C8  103C 000E                686      MOVE.B  #14,D0
+000036CC  4E4F                     687      TRAP    #15
+000036CE  1213                     688      MOVE.B  (A3),D1     RETRIEVE THE VALUE A3 POINT TO AND MOVE TO D1
+000036D0  103C 0003                689      MOVE.B  #3,D0       MOVE LITERAL 3 TO D0
+000036D4  4E4F                     690      TRAP    #15         INTREPRET VALUE IN D0, WHICH 3 WHICH DISPLAYS D1
+000036D6  6100 0040                691      BSR     DECORATE
+000036DA  4E75                     692      RTS
+000036DC                           693  
+000036DC                           694  *-------------------------------------------------------
+000036DC                           695  *-----------------------BEING ATTACKED------------------
+000036DC                           696  * THIS COULD BE USED FOR COLLISION DETECTION
+000036DC                           697  *-------------------------------------------------------
+000036DC                           698  COLLISION:
+000036DC  123C 0064                699      MOVE.B  #MINE_LOC,D1
+000036E0  B27C 0064                700      CMP     #100,D1 IS( X == 100)?
+000036E4  6600 0010                701      BNE     COLLISION_MISS IF X IS EQUAL TO 100, THEN HIT
+000036E8                           702  COLLISION_HIT:
+000036E8                           703      *HIT
+000036E8  43F9 000038F1            704      LEA     HIT_MSG,A1
+000036EE  303C 000E                705      MOVE    #14,D0
+000036F2  4E4F                     706      TRAP    #15
+000036F4  4E75                     707      RTS
+000036F6                           708      
+000036F6                           709  COLLISION_MISS:
+000036F6                           710      *MISS
+000036F6  43F9 000038F9            711      LEA     MISS_MSG,A1
+000036FC  303C 000E                712      MOVE    #14,D0
+00003700  4E4F                     713      TRAP    #15
+00003702  4E75                     714      RTS
+00003704                           715  
+00003704                           716  
+00003704                           717  *-------------------------------------------------------
+00003704                           718  *--------------------------LOOP-------------------------
+00003704                           719  *-------------------------------------------------------
+00003704                           720  LOOP:
+00003704  163C 0005                721      MOVE.B  #5, D3 LOOP COUNTER D3=5
+00003708                           722  NEXT:
+00003708  43F9 000038FF            723      LEA     LOOP_MSG,A1
+0000370E  103C 000E                724      MOVE.B  #14,D0
+00003712  4E4F                     725      TRAP    #15
+00003714  5343                     726      SUB     #1,D3   DECREMENT LOOP COUNTER
+00003716  66F0                     727      BNE     NEXT    REPEAT UNTIL D0=0
+00003718                           728  
+00003718                           729  *-------------------------------------------------------
+00003718                           730  *------------------SCREEN DECORATION--------------------
+00003718                           731  *-------------------------------------------------------
+00003718                           732  DECORATE:
+00003718  163C 003C                733      MOVE.B  #60, D3
+0000371C  6100 0046                734      BSR     ENDL
+00003720                           735  OUT:
+00003720  43F9 000038FF            736      LEA     LOOP_MSG,A1
+00003726  103C 000E                737      MOVE.B  #14,D0
+0000372A  4E4F                     738      TRAP    #15
+0000372C  5343                     739      SUB     #1,D3   DECREMENT LOOP COUNTER
+0000372E  66F0                     740      BNE     OUT     REPEAT UNTIL D0=0
+00003730  6100 0032                741      BSR     ENDL
+00003734  4E75                     742      RTS
+00003736                           743      
+00003736                           744  CLEAR_SCREEN: 
+00003736  103C 000B                745      MOVE.B  #11,D0      CLEAR SCREEN
+0000373A  323C FF00                746      MOVE.W  #$FF00,D1
+0000373E  4E4F                     747      TRAP    #15
+00003740  4E75                     748      RTS
+00003742                           749  *-------------------------------------------------------
+00003742                           750  *------------------------REPLAY-------------------------
+00003742                           751  *-------------------------------------------------------
+00003742                           752  REPLAY:
+00003742  6100 0020                753      BSR     ENDL
+00003746  43F9 00003901            754      LEA     REPLAY_MSG,A1
+0000374C  103C 000E                755      MOVE.B  #14,D0
+00003750  4E4F                     756      TRAP    #15
+00003752                           757      
+00003752  103C 0004                758      MOVE.B  #4,D0
+00003756  4E4F                     759      TRAP    #15
+00003758                           760  
+00003758  B27C 0000                761      CMP     #EXIT,D1
+0000375C  6700 F8A8                762      BEQ     END         IF SR Z REGISTER CONTAINS 1 BEQ => BRANCH EQUALS
+00003760  6100 F91A                763      BSR     GAMELOOP
+00003764                           764  
+00003764                           765  ENDL:
+00003764  48E7 8040                766      MOVEM.L D0/A1,-(A7)
+00003768  303C 000E                767      MOVE    #14,D0
+0000376C  43F9 0000377A            768      LEA     CRLF,A1
+00003772  4E4F                     769      TRAP    #15
+00003774  4CDF 0201                770      MOVEM.L (A7)+,D0/A1
+00003778  4E75                     771      RTS
+0000377A                           772      
+0000377A                           773  *-------------------------------------------------------
+0000377A                           774  *-------------------DATA DELARATIONS--------------------
+0000377A                           775  *-------------------------------------------------------
+0000377A                           776  
+0000377A= 0D 0A 00                 777  CRLF:           DC.B    $0D,$0A,0
+0000377D= 2A 2A 2A 2A 2A 2A ...    778  WELCOME_MSG:    DC.B    '************************************************************'
+000037B9= 0D 0A                    779                  DC.B    $0D,$0A
+000037BB= 44 65 73 65 72 74 ...    780                  DC.B    'Desert Frostblade: Echoes of Chill'
+000037DD= 0D 0A                    781                  DC.B    $0D,$0A
+000037DF= 2A 2A 2A 2A 2A 2A ...    782                  DC.B    '************************************************************'
+0000381B= 0D 0A 00                 783                  DC.B    $0D,$0A,0
+0000381E= 50 4F 54 49 4F 4E ...    784  POTION_MSG:     DC.B    'POTION ....'
+00003829= 0D 0A                    785                  DC.B    $0D,$0A
+0000382B= 45 4E 54 45 52 20 ...    786                  DC.B    'ENTER POTION : ',0
+0000383B= 4E 55 4D 42 45 52 ...    787  POTIONS_MSG:    DC.B    'NUMBER OF POTIONS : ',0
+00003850= 45 41 43 48 20 51 ...    788  WEAPONS_MSG:    DC.B    'EACH QUEST NEED AT LEAST 2 WEAPONS'
+00003872= 0D 0A                    789                  DC.B    $0D,$0A
+00003874= 4D 49 4E 49 4D 55 ...    790                  DC.B    'MINIMUM REQUIREMENT IS 2 I.E. SWORD X 1 AND SPEER X 1.'
+000038AA= 0D 0A                    791                  DC.B    $0D,$0A
+000038AC= 45 4E 54 45 52 20 ...    792                  DC.B    'ENTER # OF WEAPONS : ',0
+000038C2= 41 44 44 20 47 41 ...    793  GAMEPLAY_MSG:   DC.B    'ADD GAMEPLAY !',0
+000038D1= 55 50 44 41 54 45 ...    794  UPDATE_MSG:     DC.B    'UPDATE GAMEPLAY !',0
+000038E3= 44 52 41 57 20 53 ...    795  DRAW_MSG:       DC.B    'DRAW SCREEN !',0
+000038F1= 53 54 52 49 4B 45 ...    796  HIT_MSG:        DC.B    'STRIKE!',0
+000038F9= 4D 49 53 53 21 00        797  MISS_MSG:       DC.B    'MISS!',0
+000038FF= 2E 00                    798  LOOP_MSG:       DC.B    '.',0
+00003901= 45 4E 54 45 52 20 ...    799  REPLAY_MSG:     DC.B    'ENTER 0 TO QUIT ANY OTHER NUMBER TO REPLAY : ',0
+0000392F= 53 43 4F 52 45 20 ...    800  HUD_MSG:        DC.B    'SCORE : ',0 
+00003938= 50 69 63 6B 20 61 ...    801  SELECTCHOICE:   DC.B    'Pick a Choice', 0
+00003946= 50 72 65 73 73 20 ...    802  CONTINUE_MSG:    DC.B    'Press Enter to continue', 0
+0000395E= 41 6D 69 64 73 74 ...    803  INTRODUCTION_MSG:   DC.B    'Amidst the vast expanse of the Middle Eastern deserts, where the relentless sun'
+000039AD= 0D 0A                    804                  DC.B    $0D,$0A
+000039AF= 63 61 73 74 73 20 ...    805                  DC.B    'casts its unyielding gaze upon the golden dunes, a lone wanderer known as '
+000039F9= 0D 0A                    806                  DC.B    $0D,$0A
+000039FB= 52 61 68 65 65 6C ...    807                  DC.B    'Raheel emerges as an enigmatic figure. Driven by an insatiable desire to master '
+00003A4B= 0D 0A                    808                  DC.B    $0D,$0A
+00003A4D= 74 68 65 20 66 6F ...    809                  DC.B    'the forgotten arts of cold weapons in a land dominated by searing heat, Raheel'
+00003A9B= 0D 0A                    810                  DC.B    $0D,$0A
+00003A9D= 65 6D 62 61 72 6B ...    811                  DC.B    'embarks on a solitary quest, carving his own destiny amidst the shifting sands.'
+00003AEC= 0D 0A                    812                  DC.B    $0D,$0A
+00003AEE= 50 72 65 73 73 20 ...    813                  DC.B    'Press Enter to continue', 0
+00003B06                           814  
+00003B06                           815              
+00003B06= 42 6F 72 6E 20 61 ...    816  INTRODUCTION2_MSG:   DC.B    'Born and raised in the ancient city of Aqaba, Raheel''s initial discovery of '
+00003B52= 0D 0A                    817                  DC.B    $0D,$0A
+00003B54= 74 68 65 20 6F 6C ...    818                  DC.B    'the old tome within the city''s archives opened the floodgates of his destiny.'
+00003BA1= 0D 0A                    819                  DC.B    $0D,$0A
+00003BA3= 44 75 73 74 79 20 ...    820                  DC.B    'Dusty pages unfolded tales of legendary cold weapons scattered across the'
+00003BEC= 0D 0A                    821                  DC.B    $0D,$0A
+00003BEE= 64 65 73 65 72 74 ...    822                  DC.B    'desert, each possessing a unique power waiting to be harnessed by a master.'
+00003C39= 0D 0A                    823                  DC.B    $0D,$0A
+00003C3B= 47 75 69 64 65 64 ...    824                  DC.B    'Guided by a mysterious vision, Raheel sets out to uncover these ancient '
+00003C83= 0D 0A                    825                  DC.B    $0D,$0A
+00003C85= 72 65 6C 69 63 73 ...    826                  DC.B    'relics, driven not only by personal ambition but also by the silent '
+00003CC9= 0D 0A                    827                  DC.B    $0D,$0A
+00003CCB= 77 68 69 73 70 65 ...    828                  DC.B    'whispers of the desert wind, urging him to restore a balance that '
+00003D0D= 0D 0A                    829                  DC.B    $0D,$0A
+00003D0F= 68 61 73 20 6C 6F ...    830                  DC.B    'has long been lost beneath the relentless sun.'
+00003D3D= 0D 0A                    831                  DC.B    $0D,$0A
+00003D3F= 50 72 65 73 73 20 ...    832                  DC.B    'Press Enter to continue', 0
+00003D57                           833  
+00003D57                           834                  
+00003D57= 2D 2D 2D 2D 2D 2D ...    835  Scene1_MSG:     DC.B    '-------------------------------------------------------' 
+00003D8E= 0D 0A                    836                  DC.B    $0D,$0A
+00003D90= 59 6F 75 20 65 6E ...    837                  DC.B    'You enter the Cave of Eternal Frost, where the elusive '
+00003DC7= 0D 0A                    838                  DC.B    $0D,$0A
+00003DC9= 46 72 6F 73 74 20 ...    839                  DC.B    'Frost Djinn guardS the Crystal Khopesh, an ancient blade ' 
+00003E02= 0D 0A                    840                  DC.B    $0D,$0A
+00003E04= 69 6E 66 75 73 65 ...    841                  DC.B    'infused with the essence of winter.'
+00003E27= 0D 0A                    842                  DC.B    $0D,$0A
+00003E29= 2D 2D 2D 2D 2D 2D ...    843                  DC.B    '-------------------------------------------------------' , 0
+00003E61= 59 6F 75 20 62 72 ...    844  STARTEDWEAPON   DC.B    'You brought a small dagger with you'
+00003E84= 5B 31 5D 20 59 6F ...    845  SCENECHOICE1    DC.B    '[1] You fight the guard or [2] You wait  and sneak up to Grab the sword',0
+00003ECC= 59 6F 75 20 61 72 ...    846  SCE1CHOICE1     DC.B    'You are brave, and try to fight the guards with your Daggers', 0
+00003F09= 59 6F 75 20 6D 61 ...    847  SCE1CHOICE2     DC.B    'You made the right choice and decided to wait until night time'
+00003F47= 0D 0A                    848                  DC.B    $0D,$0A
+00003F49= 2C 20 79 6F 75 20 ...    849                  DC.B    ', you sneak up succesfully and grab the Sword.'
+00003F77= 0D 0A                    850                  DC.B    $0D,$0A
+00003F79= 2C 20 79 6F 75 20 ...    851                  DC.B    ', you feel a strange power filling your body....', 0
+00003FAA= 54 68 65 20 46 72 ...    852  Scene2_MSG:     DC.B    'The Frost Dijinn notice your presence and a getting ready to attack you!'
+00003FF2= 0D 0A                    853                  DC.B    $0D,$0A
+00003FF4= 45 71 75 69 70 20 ...    854                  DC.B    'Equip your swoard!', 0
+00004007= 59 6F 75 20 6D 61 ...    855  Scene3_MSG:             DC.B    'You manage to defeated the Dijin Guard'
+0000402D= 0D 0A                    856                  DC.B    $0D,$0A
+0000402F= 59 6F 75 20 61 72 ...    857                  DC.B    'You are amaze at your own power....'
+00004052= 0D 0A                    858                  DC.B    $0D,$0A
+00004054= 59 6F 75 20 67 61 ...    859                  DC.B    'You gaze at the sword for a couple of seconds before looking around the cave'
+000040A0= 0D 0A                    860                  DC.B    $0D,$0A
+000040A2= 59 6F 75 20 66 69 ...    861                  DC.B    'You find a treasure chest with 5 poitions and a bunch of golden coins in it',0
+000040EE= 0D 0A                    862                  DC.B    $0D,$0A
+000040F0= 5B 31 5D 20 59 6F ...    863  SCENE3CHOICE1   DC.B    '[1] You grab the chest or [2]Leave the cave' , 0
+0000411C= 59 6F 75 20 67 72 ...    864  SCE3CHOICE1     DC.B    'You grab the potions and leave the cave', 0
+00004144= 59 6F 75 20 6C 65 ...    865  SCE3CHOICE2     DC.B    'You leave the cave', 0
+00004157= 59 6F 75 20 73 75 ...    866  Scene4_MSG      DC.B    'You succesfully Obtain the Crystal Khopesh, achiving one of the 3 sacred weapons '
+000041A8= 0D 0A                    867                  DC.B    $0D,$0A
+000041AA= 59 6F 75 20 73 65 ...    868                  DC.B    'You see the ancient city of Agaba at the distance and you decided to head there'
+000041F9= 0D 0A                    869                  DC.B    $0D,$0A
+000041FB= 41 20 73 6F 6F 6E ...    870                  DC.B    'A soon as you enter the city the people notice your swoard and change'
+00004240= 0D 0A                    871                  DC.B    $0D,$0A
+00004242= 54 68 65 79 20 73 ...    872                  DC.B    'They scared to aproach you but a young brave kid you know aproach you to ask you'
+00004292= 0D 0A                    873                  DC.B    $0D,$0A
+00004294= 41 62 6F 75 74 20 ...    874                  DC.B    'About the sword at your back, you tell him about your exploits'
+000042D2= 0D 0A                    875                  DC.B    $0D,$0A
+000042D4= 54 68 65 20 6B 69 ...    876                  DC.B    'The kid amaze runs to spread the story to the whole city'
+0000430C= 0D 0A                    877                  DC.B    $0D,$0A
+0000430E= 41 73 20 79 6F 75 ...    878                  DC.B    'As you are planing your next move a suspicious individual aproach you'
+00004353= 0D 0A                    879                  DC.B    $0D,$0A
+00004355= 22 48 65 79 2E 2E ...    880                  DC.B    '"Hey...arent you the talk of the town?...That sword is the Khospesh aint it?"'
+000043A2= 0D 0A                    881                  DC.B    $0D,$0A
+000043A4= 22 48 6F 77 20 61 ...    882                  DC.B    '"How about you run me that!"', 0
+000043C1= 0D 0A                    883                  DC.B    $0D,$0A
+000043C3= 5B 31 5D 20 41 74 ...    884  SCENE4CHOICE    DC.B    '[1] Attack him or [2] Run away', 0
+000043E2= 22 49 6D 20 67 6F ...    885  SCE4ATTACK      DC.B    '"Im going to crush you, you folder characther!"', 0
+00004412= 22 49 74 20 69 73 ...    886  SCE4RUNAWAY     DC.B     '"It is not too late for a gentleman for vengence!" you leave the man behind' , 0
+0000445E= 22 41 66 74 65 72 ...    887  SCENE4AFTERFIGHT    DC.B    '"After the fight people look at you in awe and your reputacion increases', 0
+000044A7= 59 6F 75 20 6C 65 ...    888  SCENE4RUNAWAY   DC.B 'You leave the scene will people look at you dumbfunded your reputacion decreases', 0
+000044F8= 59 6F 75 20 61 72 ...    889  Scene5_MSG          DC.B    'You are aproached by the guild: Whispering Shadows a famous guild know for'
+00004542= 0D 0A                    890                  DC.B    $0D,$0A
+00004544= 20 69 74 73 20 6D ...    891                  DC.B    ' its mastery over the art of the Frigid Daggers and harsh training.'
+00004587= 0D 0A                    892                  DC.B    $0D,$0A
+00004589= 22 57 6F 75 6C 64 ...    893                  DC.B    '"Would you be interested in joining our guild Whispering Shadows?"'
+000045CB= 0D 0A                    894                  DC.B    $0D,$0A
+000045CD= 5B 31 5D 4A 6F 69 ...    895  SCENE5CHOICE1   DC.B    '[1]Join them or [2] Reject', 0
+000045E8= 22 53 75 72 65 2C ...    896  SCE5ACC         DC.B    '"Sure, Im quiet intriege by your guild'
+0000460E= 0D 0A                    897                  DC.B    $0D,$0A
+00004610= 41 20 63 6F 75 70 ...    898                  DC.B    'A couple of weeks pass by and you master the art of The frigids weapons.'
+00004658= 0D 0A                    899                  DC.B    $0D,$0A
+0000465A= 59 4F 55 20 47 41 ...    900                  DC.B    'YOU GAIN 20 EXTRA HP AND A NEW SET OF DAGGERS!', 0 
+00004689= 22 4E 61 68 20 69 ...    901  SCE5REJECT      DC.B    '"Nah id Reject"'
+00004698= 0D 0A                    902                  DC.B    $0D,$0A
+0000469A= 22 54 68 65 20 6D ...    903                  DC.B    '"The member is confused and look at you leave"'
+000046C8= 0D 0A                    904                  DC.B    $0D,$0A
+000046CA= 59 6F 75 20 77 61 ...    905                  DC.B    'You wander aimlessly trought the city for a few weeks having fun'
+0000470A= 0D 0A                    906                  DC.B    $0D,$0A
+0000470C= 59 4F 55 20 4C 4F ...    907                  DC.B    'YOU LOOSE 20 HP AND ALL YOUR GOLDEN COINS'
+00004735= 0D 0A                    908                  DC.B    $0D,$0A
+00004737= 59 6F 75 20 6C 65 ...    909  Scene6_MSG         DC.B    'You leave the town to look for the next Weapon: The Arctic Bow.'
+00004776= 0D 0A                    910                  DC.B    $0D,$0A
+00004778= 4C 6F 63 61 74 65 ...    911                  DC.B    'Located in the Sphinx of the Frozen Oasis'
+000047A1= 0D 0A                    912                  DC.B    $0D,$0A
+000047A3= 57 68 65 6E 20 79 ...    913                  DC.B    'When you get to the desert you walk for a while and see the Guardian'
+000047E7= 0D 0A                    914                  DC.B    $0D,$0A
+000047E9= 41 6E 64 20 61 74 ...    915                  DC.B    'And at the back of the guardian you see the Arctic Bow', 0
+00004820= 0D 0A                    916                  DC.B    $0D,$0A
+00004822                           917  
+00004822= 5B 31 5D 20 46 61 ...    918  SCE6CHOICE      DC.B    '[1] Face it head on [2] Sneak attack it', 0
+0000484A= 59 4F 55 20 46 41 ...    919  SCE6ATTACK      DC.B    'YOU FACE IT HEAD ON!'
+0000485E= 59 6F 75 20 6D 61 ...    920  SCE6SNEAK       DC.B    'You manage to sneak attack it, successfully avoiding the damage', 0
+0000489E= 41 74 20 6C 61 73 ...    921  Scene7_MSG      DC.B    'At last you manage to defeated the Guardian, and succesfully obtain the Artic Bow '
+000048F0= 0D 0A                    922                  DC.B    $0D,$0A
+000048F2= 41 66 74 65 72 20 ...    923                  DC.B    'After Holding the bow another changes occurs to Raheel, His body transform, '
+0000493E= 0D 0A                    924                  DC.B    $0D,$0A
+00004940= 46 75 72 74 68 65 ...    925                  DC.B    'Furthering developing his body, each trials make Raheel stronger.'
+00004981= 0D 0A                    926                  DC.B    $0D,$0A
+00004983= 41 73 20 68 65 20 ...    927                  DC.B    'As he gaze at the dunes of the desert Raheel gets ready for its adventure', 0
+000049CD= 0D 0A                    928                  DC.B    $0D,$0A
+000049CF= 5B 31 5D 20 53 77 ...    929  CHANGEWEAPON    DC.B    '[1] Sword or [2] Dagger', 0
+000049E7= 57 65 61 70 6F 6E ...    930  SUCCESSWITCH    DC.B    'Weapon switched' , 0    
+000049F7= 49 74 20 69 73 20 ...    931  ALREADYEQUIP    DC.B    'It is already in your hands tough...', 0 
+00004A1C= 57 68 61 74 20 79 ...    932  SELECT          DC.B    'What you waiting for?', 0
+00004A32= 54 6F 20 62 65 20 ...    933  ENDSCENE        DC.B    'To be continue...', 0
+00004A44= 53 6B 69 6C 6C 20 ...    934  Lose            DC.B    'Skill issue', 0
+00004A50= 59 4F 55 20 44 45 ...    935  DAGATTACK       DC.B    'YOU DEALT 15 DAMAGE!', 0
+00004A65= 59 4F 55 20 44 45 ...    936  DAGATTACK2  DC.B    'YOU DEALT 35 DAMAGE!', 0
+00004A7A= 59 4F 55 20 44 45 ...    937  SWOATTACK   DC.B    'YOU DEALT 55 DAMAGE!', 0
+00004A8F= 59 4F 55 20 57 49 ...    938  Win             DC.B    'YOU WIN W'     ,0                     
+00004A99= 44 6F 20 79 6F 75 ...    939  COMBAT_MSG:         DC.B    'Do you want to attack[1] Use potion [2] change weapon [3] ',0
+00004AD4= 59 4F 55 20 52 45 ...    940  ATTACKSCHOICE1   DC.B    'YOU RECEIVE 100 DAMAGE! ',0
+00004AED= 59 4F 55 20 52 45 ...    941  ATTACKSCHOICE2   DC.B    'YOU RECEIVE 20 DAMAGE!'  ,0             
+00004B04= 59 4F 55 20 52 45 ...    942  ATTACKSCHOICES  DC.B    'YOU RECIVE 25  DAMAGE:', 0
+00004B1B= 59 4F 55 20 52 45 ...    943  ATTACKSCHOICES3  DC.B    'YOU RECIVE 30  DAMAGE:', 0
+00004B32= 0A                       944  DAGGER          DC.B    10
+00004B33= 32                       945  SWORD           DC.B    50             
+00004B34                           946  
+00004B34= 59 4F 55 20 53 57 ...    947  SWITCHWEAPONS   DC.B    'YOU SWITCH WEAPONS', 0
+00004B47= 05                       948  POTIONNUM       DC.B    5      
+00004B48                           949  HEALTH:         DS.W    1   PLAYERS HEALTH
+00004B4A                           950  SCORE:          DS.W    1   RESERVE SPACE FOR SCORE
+00004B4C                           951  
+00004B4C                           952      END START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ALREADYEQUIP        49F7
+ATTACKSCHOICE1      4AD4
+ATTACKSCHOICE2      4AED
+ATTACKSCHOICES      4B04
+ATTACKSCHOICES3     4B1B
+CHANGEWEAPON        49CF
+CLEAR_SCREEN        3736
+COLLISION           36DC
+COLLISION_HIT       36E8
+COLLISION_MISS      36F6
+COMBAT              3158
+COMBAT2             3182
+COMBAT3             31AC
+COMBAT_MSG          4A99
+CONTINUE_MSG        3946
+CRLF                377A
+DAGATTACK           4A50
+DAGATTACK2          4A65
+DAGGER              4B32
+DAGGERATTACK        324E
+DAGGERATTACK2       32DC
+DAGGERATTACK3       336E
+DECORATE            3718
+DRAW                30C0
+DRAW_MSG            38E3
+END                 3006
+ENDL                3764
+ENDSCENE            4A32
+EXIT                0
+GAME                3000
+GAMELOOP            307C
+GAMEPLAY            33C4
+GAMEPLAY_MSG        38C2
+HEALTH              4B48
+HIT_MSG             38F1
+HUD                 36BA
+HUD_MSG             392F
+INPUT               3072
+INTRODUCTION        3032
+INTRODUCTION2       3052
+INTRODUCTION2_MSG   3B06
+INTRODUCTION_MSG    395E
+LOOP                3704
+LOOP_MSG            38FF
+LOSE                4A44
+LOSE_POINT          8
+MAX_POTIONS         9
+MAX_WEAPONS         3
+MINE_LOC            64
+MIN_POTIONS         1
+MIN_WEAPONS         1
+MISS_MSG            38F9
+NEXT                3708
+OUT                 3720
+POTIONCHECKER       3106
+POTIONDENY          3114
+POTIONDENY1         3120
+POTIONNUM           4B47
+POTIONS             30DA
+POTIONS_MSG         383B
+POTIONUSED          3140
+POTIONUSED1         3130
+POTION_MSG          381E
+REPLAY              3742
+REPLAY_MSG          3901
+SCE1CHOICE1         3ECC
+SCE1CHOICE2         3F09
+SCE3CHOICE1         411C
+SCE3CHOICE2         4144
+SCE4ATTACK          43E2
+SCE4RUNAWAY         4412
+SCE5ACC             45E8
+SCE5REJECT          4689
+SCE6ATTACK          484A
+SCE6CHOICE          4822
+SCE6SNEAK           485E
+SCENE1              33CE
+SCENE1_MSG          3D57
+SCENE2              344E
+SCENE2_MSG          3FAA
+SCENE3              3464
+SCENE3CHOICE1       40F0
+SCENE3_MSG          4007
+SCENE4              34E4
+SCENE4AFTERFIGHT    445E
+SCENE4CHOICE        43C3
+SCENE4PART1         3558
+SCENE4PART2         3572
+SCENE4RUNAWAY       44A7
+SCENE4_MSG          4157
+SCENE5              35A2
+SCENE5CHOICE1       45CD
+SCENE5_MSG          44F8
+SCENE6              3628
+SCENE6_MSG          4737
+SCENE7              36A4
+SCENE7_MSG          489E
+SCENECHOICE1        3E84
+SCORE               4B4A
+SELECT              4A1C
+SELECT1             340A
+SELECT3             34A0
+SELECT4             358C
+SELECT5             3612
+SELECT6             3690
+SELECTC             31D6
+SELECTC2            31EC
+SELECTC3            3200
+SELECTCHOICE        3938
+SN1CHOICE1          341E
+SN1CHOICE2          3434
+SN3CHOICE1          34B4
+SN3CHOICE2          34CA
+SN4CHOICE1          3520
+SN4CHOICE2          353E
+SN5CHOICE1          35DE
+SN5CHOICE2          35F8
+SN6CHOICE1          3664
+SN6CHOICE2          367A
+START               1000
+STARTEDWEAPON       3E61
+SUCCESSWITCH        49E7
+SWITCHWEAPONS       4B34
+SWOATTACK           4A7A
+SWORD               4B33
+SWORDSATTACK        3276
+SWORDSATTACK2       3306
+SWORDSATTACK3       3398
+UPDATE              30A6
+UPDATE_MSG          38D1
+WEAPONS             3214
+WEAPONS2            32A0
+WEAPONS3            3332
+WEAPONS_MSG         3850
+WELCOME             300A
+WELCOME_MSG         377D
+WIN                 4A8F
+WIN_POINT           5
